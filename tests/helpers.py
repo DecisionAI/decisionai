@@ -178,7 +178,6 @@ def run_sim(
     # convenience params for the common case where there's only one dataset/model
     dataset : DatasetDefinition = None,
     model = None,
-    drilldown=None,
 ):
     variables = variables or []
     policies = policies or []
@@ -191,7 +190,7 @@ def run_sim(
         assert not models
         models = [model]
     sim = TestSim(variables, policies, datasets, models,
-            num_steps, num_sims, num_previous_sims, drilldown,
+            num_steps, num_sims, num_previous_sims,
     )
     sim.run()
     if not allow_errs:
@@ -207,14 +206,13 @@ def init_sim(
     num_sims: int = 1,
     num_previous_sims: int = 0,
     allow_errs=False,
-    drilldown=None,
 ):
     variables = variables or []
     policies = policies or []
     datasets = datasets or []
     models = models or []
     sim = TestSim(variables, policies, datasets, models,
-            num_steps, num_sims, num_previous_sims, drilldown,
+            num_steps, num_sims, num_previous_sims
     )
     if not allow_errs:
         sim.assert_no_errors()
