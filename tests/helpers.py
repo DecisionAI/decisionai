@@ -190,7 +190,6 @@ def run_sim(
         assert not models
         models = [model]
     sim = TestSim(variables, policies, datasets, models, num_steps, num_sims, num_previous_sims,)
-    import pdb; pdb.set_trace()
     sim.run()
     if not allow_errs:
         sim.assert_no_errors()

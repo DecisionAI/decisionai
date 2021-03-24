@@ -17,7 +17,7 @@ def clf_factory(fname):
 
 def test_external_model_basic():
     # A regression model taking three inputs.
-    model = {"label": "DEMAND_MODEL", "objectPath": ["testing/three_input_model.pkl"],}
+    model = {"label": "DEMAND_MODEL", "localPath": "tests/sample_models/three_input_model.pkl",}
     sim = run_sim(
             [
                 v('competitor_price', 'uniform(100, 200)'),

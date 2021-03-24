@@ -62,11 +62,11 @@ class DatasetAdditionVar(SingleTreeVariable):
         return cls(name, tree, init, parent_table_label, errors)
 
 class DatasetDefinition(TypedDict, total=False):
+    # TODO:  Should get rid of this and just instantiate datasets. This is a throwback to when a definition wasn't a 
+    # dataframe because the user specified a URI
     label: str
     variables: List[DatasetVarDefinition]
-    objectPath: List[str]
-    # Used only in unit tests (in place of above two keys)
-    csvLiteral: str
+    df: pd.DataFrame
 
 class Dataset(NamedTuple):
     # TODO: should probably call this 'label' for consistency with naming elsewhere
@@ -89,9 +89,8 @@ class Dataset(NamedTuple):
     @classmethod
     def from_json(cls, raw: DatasetDefinition) -> 'Dataset':
         file_label = raw["label"]
-        literal = raw.get('csvLiteral')
         # TODO: Have this access real data
-        df = pd.DataFrame()
+        df = raw['df']
         ds = cls(name=file_label, df=df, added_vars=[])
         for vardef in raw.get("variables", []):
             ds.add_variable(vardef)

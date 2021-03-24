@@ -23,8 +23,6 @@ _ALL_EXTENSIONS = _PICKLE_EXTENSIONS | _TF_EXTENSIONS
 
 class ExternalModelDefinition(TypedDict, total=False):
     label: str
-    objectPath: List[str]
-    # Only used in testing. Path to a local pickle file.
     localPath: str
 
 class ModelError(VisibleError):
