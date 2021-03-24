@@ -193,21 +193,3 @@ def run_sim(
     if not allow_errs:
         sim.assert_no_errors()
     return sim
-
-def init_sim(
-    variables: Iterable[VarDefinition] = None,
-    policies: Iterable[PolicyDefinition] = None,
-    datasets: Iterable[DatasetDefinition] = None,
-    models = None,
-    num_steps: int = 3,
-    num_sims: int = 1,
-    allow_errs=False,
-):
-    variables = variables or []
-    policies = policies or []
-    datasets = datasets or []
-    models = models or []
-    sim = TestSim(variables, policies, datasets, models, num_steps, num_sims)
-    if not allow_errs:
-        sim.assert_no_errors()
-    return sim

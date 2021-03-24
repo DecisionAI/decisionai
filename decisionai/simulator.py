@@ -67,12 +67,12 @@ class Simulation:
         return self.variables + self.attributes + self.dataset_variables
 
     def __init__(self,
-        variables: Iterable[VarDefinition],
-        policies: Iterable[PolicyDefinition],
-        datasets: Iterable[DatasetDefinition],
-        external_models: Iterable[ExternalModelDefinition],
-        num_steps: int,
-        num_sims: int,
+        variables: Iterable[VarDefinition] = [],
+        policies: Iterable[PolicyDefinition] = [],
+        datasets: Iterable[DatasetDefinition] = [],
+        external_models: Iterable[ExternalModelDefinition] = [],
+        num_steps: int = 50,
+        num_sims: int = 50,
     ):
         self.extra_errors = []
         self.num_steps = num_steps
