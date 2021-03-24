@@ -394,7 +394,7 @@ class TreeEvaluator(ast.NodeVisitor):
         if ix > self.time:
             raise EvaluationError(f"Evaluating {self.qv.name} at t={self.time}"
                 f" involved looking into the future (to t={ix})")
-        res = self.sim.lookup_var(var.dotted_name, ix, self.policy_index)
+        res = self.sim._lookup_var(var.dotted_name, ix, self.policy_index)
         # The last condition here ensures that the nan relates to a lookup that's
         # aimed backwards in time (even if it gets clipped to 0). This help avoids
         # false positive 'need initial value' errors when the nan is the result of

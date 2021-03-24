@@ -38,6 +38,7 @@ INSURANCE_CSV = pd.read_csv(StringIO("""id,initial_premium,initial_total_claims,
 2,208,0,Lima
 3,233,0,Cusco
 4,225,0,Cusco"""))
+
 INSURANCE_DATASET_DEF = dict(
         label="INS",
         df=INSURANCE_CSV,

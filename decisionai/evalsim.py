@@ -105,17 +105,17 @@ class Simulation:
 
         # Get data structures to hold variable values. Also populates with
         # any static initial values.
-        self.var_values = get_standard_value_holder(self.variables, self.num_policies, num_steps, num_sims)
+        self.var_values = _get_standard_value_holder(self.variables, self.num_policies, num_steps, num_sims)
         self.var_values["t"] = np.tile(
                 np.reshape(range(self.num_steps+1), (self.num_steps+1, 1, 1)),
                 (1, self.num_policies, self.num_sims)
         )
-        self.attrib_values = get_standard_value_holder(
+        self.attrib_values = _get_standard_value_holder(
             self.attributes, self.num_policies, num_steps, num_sims
         )
         self.dataset_var_values = self._get_dataset_value_holders()
         self.excerpts = {
-                ds.name: get_excerpt_placeholder(ds, self)
+                ds.name: _get_excerpt_placeholder(ds, self)
                 for ds in self.datasets.values()
         }
 
@@ -174,7 +174,7 @@ class Simulation:
             res[dataset.name] = ds_vals
         return res
 
-    def run_one_update(
+    def _run_one_update(
         self,
         node: BaseVariable,
         time: int,
@@ -215,7 +215,7 @@ class Simulation:
         else:
             raise ValueError(f"Not a BaseVariable: {node}")
 
-    def lookup_var(
+    def _lookup_var(
         self,
         varname, # dotted
         time,
@@ -259,27 +259,27 @@ class Simulation:
             else:
                 qv.tree = transform(qv.tree)
 
-    def compute_node(self, relevant_node: BaseVariable, t):
+    def _compute_node(self, relevant_node: BaseVariable, t):
         if type(relevant_node) == PolicyAttribute:
             # For policy attributes, we do separate updates for each policy
             for policy_index in range(self.num_policies):
-                _ = self.run_one_update(
+                _ = self._run_one_update(
                     relevant_node,
                     t,
                     policy_index=policy_index,
                 )
         else:
             # for variables, we simulate results of all policies in one call
-            _ = self.run_one_update(relevant_node, t)
+            _ = self._run_one_update(relevant_node, t)
 
     def run(self):
         for t in range(self.num_steps + 1):
             for name in self.nodes_in_order:
                 relevant_node = self.var_lookup[name]
-                self.compute_node(relevant_node, t)
-            self.post_timestep_hook(t)
+                self._compute_node(relevant_node, t)
+            self._post_timestep_hook(t)
 
-    def post_timestep_hook(self, t):
+    def _post_timestep_hook(self, t):
         """Called after computing all variable values for given value of t.
         Used to invoke various bookkeeping tasks.
         """
@@ -295,12 +295,12 @@ class Simulation:
             for holder in varmap.values():
                 holder.advance_time(t+1)
 
-    def organize_errors(self):
-        collect = lambda vars: organize_errors(
+    def _organize_errors(self):
+        collect = lambda vars: _organize_errors(
                 [err for var in vars for err in var.errors]
         )
         return (
-                organize_errors([err for var in self.variables for err in var.errors]
+                _organize_errors([err for var in self.variables for err in var.errors]
                     + self.extra_errors),
                 collect(self.attributes),
                 collect(self.dataset_variables),
@@ -327,7 +327,7 @@ class Simulation:
                     )
 
         # Self refs
-        self_var_ref_names = get_self_refs(self.deps)
+        self_var_ref_names = _get_self_refs(self.deps)
         for name in self_var_ref_names:
             var = self.var_lookup[name]
             var.errors.append(
@@ -345,7 +345,7 @@ class Simulation:
             )
 
 
-def get_standard_value_holder(
+def _get_standard_value_holder(
     nodes: Iterable[Union[Variable, PolicyAttribute]],
     num_policies,
     num_time_steps,
@@ -369,7 +369,7 @@ def get_standard_value_holder(
     return res
 
 
-def get_excerpt_placeholder(dataset, sim) -> Dict[str, np.ndarray]:
+def _get_excerpt_placeholder(dataset, sim) -> Dict[str, np.ndarray]:
     """Given a dataset and its parent simulation, return a dict mapping variable
     names (from that dataset) to ndarrays allocated with space to hold an excerpt
     of dataset variable values (returned as part of the main API response). The
@@ -384,7 +384,7 @@ def get_excerpt_placeholder(dataset, sim) -> Dict[str, np.ndarray]:
         res[dsvar.name] = np.full(shape, np.nan)
     return res
 
-def organize_errors(errors_list):
+def _organize_errors(errors_list):
     """Given a collection of errors (encoded as 3-tuples), return a dict-of-dicts
     mapping name to error_type to lists of error details.
     """
@@ -394,5 +394,5 @@ def organize_errors(errors_list):
     return errors_by_name_by_type
 
 
-def get_self_refs(refs: Dict[str, Set[str]]) -> List[str]:
+def _get_self_refs(refs: Dict[str, Set[str]]) -> List[str]:
     return [k for k in refs if k in refs[k]]
