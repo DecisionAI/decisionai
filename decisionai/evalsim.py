@@ -21,7 +21,6 @@ from . import constants
 class Simulation:
     num_steps: int
     num_sims: int
-    num_previous_sims: int
     # NB: this is set to 1 if no explicit policy labels or attributes are defined
     num_policies: int
 
@@ -74,12 +73,10 @@ class Simulation:
         external_models: Iterable[ExternalModelDefinition],
         num_steps: int,
         num_sims: int,
-        num_previous_sims: int,
     ):
         self.extra_errors = []
         self.num_steps = num_steps
         self.num_sims = num_sims
-        self.num_previous_sims = num_previous_sims
         self.attributes = policies_to_attributes(user_policies)
         self.variables = [Variable.from_json(vardef) for vardef in user_variables]
         datasets = [Dataset.from_json(dsdef) for dsdef in user_datasets]

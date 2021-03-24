@@ -29,7 +29,7 @@ def excerpt_dataset_results(ds_var_values):
     return res
 
 def var_values_df(sim):
-    return _var_values_df(sim.var_values, sim.num_previous_sims)
+    return _var_values_df(sim.var_values)
 
 def dataset_var_values_excerpt_dfs(sim, labels=None):
     """
@@ -72,7 +72,7 @@ def dataset_var_values_excerpt_dfs(sim, labels=None):
     return res
 
 
-def _var_values_df(var_values, num_previous_sims=0):
+def _var_values_df(var_values):
     """Return a dataframe with columns [t, simId, policyId] + a column for each
     variable name in var_values.
     """
@@ -100,7 +100,7 @@ def _var_values_df(var_values, num_previous_sims=0):
 
     def add_sim_policy_t_columns(in_results: Dict[str, List]):
         # Map these three standard keys to flat lists of their values
-        in_results["simId"] = map(lambda x: x + num_previous_sims, simIds)
+        in_results["simId"] = map(lambda x: x, simIds)
         in_results["policyId"] = policyIds
         in_results["t"] = ts
 

@@ -173,7 +173,6 @@ def run_sim(
     models = None,
     num_steps: int = 3,
     num_sims: int = 1,
-    num_previous_sims: int = 0,
     allow_errs=False,
     # convenience params for the common case where there's only one dataset/model
     dataset : DatasetDefinition = None,
@@ -189,7 +188,7 @@ def run_sim(
     if model:
         assert not models
         models = [model]
-    sim = TestSim(variables, policies, datasets, models, num_steps, num_sims, num_previous_sims,)
+    sim = TestSim(variables, policies, datasets, models, num_steps, num_sims)
     sim.run()
     if not allow_errs:
         sim.assert_no_errors()
@@ -202,14 +201,13 @@ def init_sim(
     models = None,
     num_steps: int = 3,
     num_sims: int = 1,
-    num_previous_sims: int = 0,
     allow_errs=False,
 ):
     variables = variables or []
     policies = policies or []
     datasets = datasets or []
     models = models or []
-    sim = TestSim(variables, policies, datasets, models, num_steps, num_sims, num_previous_sims,)
+    sim = TestSim(variables, policies, datasets, models, num_steps, num_sims)
     if not allow_errs:
         sim.assert_no_errors()
     return sim
