@@ -189,9 +189,8 @@ def run_sim(
     if model:
         assert not models
         models = [model]
-    sim = TestSim(variables, policies, datasets, models,
-            num_steps, num_sims, num_previous_sims,
-    )
+    sim = TestSim(variables, policies, datasets, models, num_steps, num_sims, num_previous_sims,)
+    import pdb; pdb.set_trace()
     sim.run()
     if not allow_errs:
         sim.assert_no_errors()
@@ -211,9 +210,7 @@ def init_sim(
     policies = policies or []
     datasets = datasets or []
     models = models or []
-    sim = TestSim(variables, policies, datasets, models,
-            num_steps, num_sims, num_previous_sims
-    )
+    sim = TestSim(variables, policies, datasets, models, num_steps, num_sims, num_previous_sims,)
     if not allow_errs:
         sim.assert_no_errors()
     return sim

@@ -65,7 +65,6 @@ class DatasetDefinition(TypedDict, total=False):
     label: str
     variables: List[DatasetVarDefinition]
     objectPath: List[str]
-    uri: List[str]
     # Used only in unit tests (in place of above two keys)
     csvLiteral: str
 
