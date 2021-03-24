@@ -3,7 +3,7 @@ from typing import Iterable, List
 import numpy as np
 import pytest
 
-from decisionai.evalsim import Simulation
+from decisionai.simulator import Simulation
 from decisionai import api_helpers, constants
 from decisionai.variables import VarDefinition
 from decisionai.datasets import DatasetDefinition

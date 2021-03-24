@@ -5,7 +5,7 @@ def test_topo_sort_missing():
 
 
 def test_topo_sort_self():
-    # Self deps are identified in evalsim, and thus not reported in topo_sort_removing_errors
+    # Self deps are identified in simulator, and thus not reported in topo_sort_removing_errors
     assert topo_sort_removing_errors({"b": set("b")}) == ([], set())
 
 

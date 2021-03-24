@@ -67,9 +67,9 @@ class Simulation:
         return self.variables + self.attributes + self.dataset_variables
 
     def __init__(self,
-        user_variables: Iterable[VarDefinition],
-        user_policies: Iterable[PolicyDefinition],
-        user_datasets: Iterable[DatasetDefinition],
+        variables: Iterable[VarDefinition],
+        policies: Iterable[PolicyDefinition],
+        datasets: Iterable[DatasetDefinition],
         external_models: Iterable[ExternalModelDefinition],
         num_steps: int,
         num_sims: int,
@@ -77,9 +77,9 @@ class Simulation:
         self.extra_errors = []
         self.num_steps = num_steps
         self.num_sims = num_sims
-        self.attributes = policies_to_attributes(user_policies)
-        self.variables = [Variable.from_json(vardef) for vardef in user_variables]
-        datasets = [Dataset.from_json(dsdef) for dsdef in user_datasets]
+        self.attributes = policies_to_attributes(policies)
+        self.variables = [Variable.from_json(vardef) for vardef in variables]
+        datasets = [Dataset.from_json(dsdef) for dsdef in datasets]
         self.datasets = {ds.name: ds for ds in datasets}
         
         self._validate_unique_names()
