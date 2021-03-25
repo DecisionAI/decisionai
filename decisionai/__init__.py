@@ -1,4 +1,3 @@
-from . import api_helpers, constants, datasets, errors, simulator, policies, topo_sort, variables, formulas
-from .datasets import *
+from . import api_helpers, dataset, errors, simulation, policy, topo_sort, variable, formulas
 
 __version__ = '0.1'

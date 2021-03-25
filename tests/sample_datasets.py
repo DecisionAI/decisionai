@@ -1,6 +1,6 @@
 from io import StringIO
 import pandas as pd
-from decisionai.datasets import Dataset
+from decisionai.dataset import Dataset
 
 WORKERS_CSV = pd.read_csv(StringIO("""name,workers,max_production
 low,1,100

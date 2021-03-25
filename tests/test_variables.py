@@ -1,6 +1,6 @@
 from sample_datasets import *
-from decisionai.variables import Variable
-from decisionai.datasets import Dataset
+from decisionai.variable import Variable
+from decisionai.dataset import Dataset
 
 def test_var_name():
 

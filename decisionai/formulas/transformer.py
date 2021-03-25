@@ -19,9 +19,9 @@ from .errors import *
 from .tree_utils import varname_for_simple_indexee
 from .provided_fns import FUNCTIONS
 from .randomness import sample, RANDOM_SAMPLING_FNS
-from decisionai.datasets import DatasetAdditionVar
+from decisionai.dataset import DatasetAdditionVar
 from decisionai.errors import VisibleError, SilentError
-from decisionai.variables import BaseVariable
+from decisionai.variable import BaseVariable
 
 class TreeTransformer(ast.NodeTransformer):
     def __init__(self, qv:BaseVariable, sim):

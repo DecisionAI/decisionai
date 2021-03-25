@@ -3,10 +3,10 @@ from typing import Optional, Tuple
 import numpy as np
 from contextlib import contextmanager
 
-from decisionai.datasets import DatasetAdditionVar
-from decisionai.policies import PolicyAttribute
+from decisionai.dataset import DatasetAdditionVar
+from decisionai.policy import PolicyAttribute
 from decisionai.errors import NeedInitialValueError, SilentError, CriticalError, visibly_wrapped_exception
-from decisionai.variables import BaseVariable, Variable
+from decisionai.variable import BaseVariable, Variable
 
 from .provided_fns import OPERATORS, summed_join
 from .randomness import sample, RANDOM_SAMPLING_FNS

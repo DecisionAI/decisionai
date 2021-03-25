@@ -1,6 +1,6 @@
 import ast
 
-from decisionai.datasets import DatasetAdditionVar
+from decisionai.dataset import DatasetAdditionVar
 from .errors import EvaluationError
 from .synthetic_nodes import SimpleVarNode, ColumnNode
 

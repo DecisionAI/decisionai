@@ -6,7 +6,7 @@ from copy import deepcopy
 
 from sample_datasets import *
 from helpers import run_sim as _run_sim, pols
-from decisionai.variables import Variable as v
+from decisionai.variable import Variable as v
 
 
 # For purposes of this module specifically, we'll flip the default behaviour of

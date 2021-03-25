@@ -5,7 +5,7 @@ import pytest
 from copy import deepcopy
 from sample_datasets import *
 from helpers import run_sim, pols
-from decisionai.variables import Variable as v
+from decisionai.variable import Variable as v
 
 
 def test_fibonacci():

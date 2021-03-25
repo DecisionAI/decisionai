@@ -12,7 +12,7 @@ from typing import (
         Union, Tuple,
 )
 
-from .variables import Variable
+from .variable import Variable
 
 
 class DatasetAdditionVar(Variable):

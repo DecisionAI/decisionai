@@ -7,7 +7,7 @@ import numpy as np
 
 from .errors import PreprocessingError
 from .provided_fns import FUNCTIONS
-from decisionai.variables import BaseVariable
+from decisionai.variable import BaseVariable
 from decisionai.external_models import Model
 
 class BaseVarNode(ast.AST):

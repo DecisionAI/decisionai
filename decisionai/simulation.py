@@ -2,14 +2,14 @@ from collections import defaultdict, Counter
 import numpy as np
 from typing import Iterable, Dict, List, Union, Set, Tuple, Optional, Any
 
-from .datasets import (
+from .dataset import (
     Dataset,
     DatasetAdditionVar,
     DatasetVariableValueHolder,
 )
 from .external_models import parse_model_defn, ExternalModelDefinition, Model
-from .policies import PolicyAttribute, PolicyDefinition, policies_to_attributes, get_num_policies
-from .variables import BaseVariable, Variable
+from .policy import PolicyAttribute, PolicyDefinition, policies_to_attributes, get_num_policies
+from .variable import BaseVariable, Variable
 from .topo_sort import topo_sort_removing_errors
 from .errors import Error, VisibleError, SilentError
 from .formulas import DependencyCollector, TreeTransformer, TreeEvaluator

@@ -4,7 +4,7 @@ import os
 import pytest
 
 from helpers import run_sim, pols
-from decisionai.variables import Variable as v
+from decisionai.variable import Variable as v
 from sample_datasets import *
 from copy import deepcopy
 

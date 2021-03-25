@@ -3,8 +3,8 @@ import pandas as pd
 import pytest
 
 from sample_datasets import *
-from decisionai.simulator import Simulation
-from decisionai.variables import Variable as v
+from decisionai.simulation import Simulation
+from decisionai.variable import Variable as v
 
 def test_no_deps():
     sim = Simulation([v('x', '0'), v('y', '2**3')])

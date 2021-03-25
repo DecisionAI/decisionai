@@ -6,7 +6,7 @@ import pytest
 from sample_datasets import *
 from helpers import run_sim, pols
 from copy import deepcopy
-from decisionai.variables import Variable as v
+from decisionai.variable import Variable as v
 
 def test_sum_fn():
     db = deepcopy(WORKERS_DATASET_DEF)

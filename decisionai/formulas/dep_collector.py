@@ -2,7 +2,7 @@ import ast
 from typing import Set, Dict
 from collections import defaultdict
 
-from decisionai.variables import BaseVariable
+from decisionai.variable import BaseVariable
 
 
 class DependencyCollector(ast.NodeVisitor):

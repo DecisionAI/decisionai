@@ -3,11 +3,12 @@ from typing import Iterable, List
 import numpy as np
 import pytest
 
-from decisionai.simulator import Simulation
 from decisionai import api_helpers, constants
-from decisionai.variables import Variable
-from decisionai.datasets import Dataset
-from decisionai.policies import PolicyDefinition
+from decisionai.simulation import Simulation
+from decisionai import api_helpers
+from decisionai.variable import Variable
+from decisionai.dataset import Dataset
+from decisionai.policy import PolicyDefinition
 
 def pols(**kwargs) -> List[PolicyDefinition]:
     """
@@ -47,7 +48,7 @@ class TestSim(Simulation):
     def assert_values_match_across_time(self, varname, expected, **kwargs):
         assert 't' not in kwargs
         if '.' in varname:
-            # For dataset variables, we'll be using the excerpt df, which has only 
+            # For dataset variables, we'll be using the excerpt df, which has only
             # a limited set of timesteps
             steps = range(
                     constants.EXCERPT_START,
