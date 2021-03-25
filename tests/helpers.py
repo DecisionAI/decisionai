@@ -5,18 +5,13 @@ import pytest
 
 from decisionai.simulator import Simulation
 from decisionai import api_helpers, constants
-from decisionai.variables import VarDefinition
-from decisionai.datasets import DatasetDefinition
+from decisionai.variables import Variable
+from decisionai.datasets import Dataset
 from decisionai.policies import PolicyDefinition
 
-def v(short_name:str, equation:str, initial=None) -> VarDefinition:
-    """Helper for succinctly creating VarDefinition dicts.
-    """
-    assert isinstance(short_name, str) and isinstance(equation, str)
-    var = dict(short_name=short_name, equation=equation)
-    if initial is not None:
-        var['initial'] = initial
-    return var
+def v(short_name:str, equation:str, initial=None) -> Variable:
+    # TODO: Remove this, and replace any references to v with direct creation of Variable
+    return Variable(short_name, equation)
 
 def pols(**kwargs) -> List[PolicyDefinition]:
     """
@@ -167,15 +162,15 @@ class TestSim(Simulation):
 
 
 def run_sim(
-    variables: Iterable[VarDefinition] = None,
+    variables: Iterable[Variable] = None,
     policies: Iterable[PolicyDefinition] = None,
-    datasets: Iterable[DatasetDefinition] = None,
+    datasets: Iterable[Dataset] = None,
     models = None,
     num_steps: int = 3,
     num_sims: int = 1,
     allow_errs=False,
     # convenience params for the common case where there's only one dataset/model
-    dataset : DatasetDefinition = None,
+    dataset : Dataset = None,
     model = None,
 ):
     variables = variables or []

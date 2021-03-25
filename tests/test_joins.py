@@ -2,6 +2,10 @@ import pytest
 
 from sample_datasets import *
 from helpers import run_sim, v, pols
+from copy import deepcopy
+
+# TODO: All through this file we're reusing some mocks, copying and mutating
+# that's unlike actual usage patterns. Fix that.
 
 # Used when we want to test a sim with multiple policies, but we don't really
 # care about the contents of their attributes.
@@ -135,12 +139,11 @@ def test_join_fn_indexing_matters():
 def test_join_multiple_datasets_bijection():
     """A join involving two datasets which happen to have a perfect 1-to-1 correspondence.
     """
-    workers = WORKERS_DATASET_DEF.copy()
-    workers['label'] = 'WORKERS'
-    para = PARAWORKERS_DATASET_DEF.copy()
-    workers['variables'] = [
-            v('joined', 'join(name == PARAWORKERS.name, PARAWORKERS.widgets)'),
-    ]
+    workers = deepcopy(WORKERS_DATASET_DEF)
+    workers.name = 'WORKERS'
+    para = PARAWORKERS_DATASET_DEF
+    workers._add_var(v('joined', 'join(name == PARAWORKERS.name, PARAWORKERS.widgets)'))
+
     sim = run_sim(
             [],
             datasets=[para, workers],
@@ -155,12 +158,11 @@ def test_join_multiple_datasets_injection():
     """Similar to above scenario, except the dataset we're joining to has an
     extra row which doesn't participate in the join results
     """
-    workers = WORKERS_DATASET_DEF.copy()
-    workers['label'] = 'WORKERS'
-    more = MOREWORKERS_DATASET_DEF.copy()
-    workers['variables'] = [
-            v('joined', 'join(name == MOREWORKERS.name, MOREWORKERS.widgets)'),
-    ]
+    workers = deepcopy(WORKERS_DATASET_DEF)
+    workers.name = 'WORKERS'
+    more = deepcopy(MOREWORKERS_DATASET_DEF)
+    workers._add_var(v('joined', 'join(name == MOREWORKERS.name, MOREWORKERS.widgets)'))
+    
     sim = run_sim(
             [],
             datasets=[more, workers],
@@ -172,12 +174,12 @@ def test_join_multiple_datasets_injection():
     )
 
 def test_sum_join_multiple_datasets_bijection():
-    workers = WORKERS_DATASET_DEF.copy()
-    workers['label'] = 'WORKERS'
-    para = PARAWORKERS_DATASET_DEF.copy()
-    workers['variables'] = [
-            v('joined', 'sum(join(name == PARAWORKERS.name, PARAWORKERS.widgets))'),
-    ]
+    workers = deepcopy(WORKERS_DATASET_DEF)
+    workers.name = 'WORKERS'
+    para = deepcopy(PARAWORKERS_DATASET_DEF)
+    para.name = 'PARAWORKERS'
+    workers._add_var(v('joined', 'sum(join(name == PARAWORKERS.name, PARAWORKERS.widgets))'))
+            
     sim = run_sim(
             [],
             datasets=[para, workers],
@@ -190,12 +192,11 @@ def test_sum_join_multiple_datasets_bijection():
     )
 
 def test_sum_join_multiple_datasets_undermatching():
-    workers = WORKERS_DATASET_DEF.copy()
-    workers['label'] = 'WORKERS'
-    more = MOREWORKERS_DATASET_DEF.copy()
-    more['variables'] = [
-            v('joined', 'sum(join(name == WORKERS.name, WORKERS.max_production))'),
-    ]
+    workers = deepcopy(WORKERS_DATASET_DEF)
+    workers.name = 'WORKERS'
+    more = deepcopy(MOREWORKERS_DATASET_DEF)
+    more._add_var(v('joined', 'sum(join(name == WORKERS.name, WORKERS.max_production))'))
+            
     sim = run_sim(
             [],
             datasets=[more, workers],
@@ -208,12 +209,12 @@ def test_sum_join_multiple_datasets_undermatching():
     )
 
 def test_sum_join_multiple_datasets_overmatching():
-    workers = WORKERS_DATASET_DEF.copy()
-    workers['label'] = 'WORKERS'
-    more = MOREWORKERS_DATASET_DEF.copy()
-    workers['variables'] = [
-            v('joined', 'sum(join(workers == MOREWORKERS.borkers, MOREWORKERS.widgets))'),
-    ]
+    workers = deepcopy(WORKERS_DATASET_DEF)
+    workers.name = 'WORKERS'
+    more = deepcopy(MOREWORKERS_DATASET_DEF)
+    workers._add_var(
+            v('joined', 'sum(join(workers == MOREWORKERS.borkers, MOREWORKERS.widgets))')
+    )
     sim = run_sim(
             [],
             datasets=[more, workers],
@@ -232,12 +233,12 @@ def test_sum_join_multiple_datasets_undermatching_multiple_policies():
     policy/sim, even if the quantity being tested has no dependence on policy
     attributes or inter-simulation randomness.
     """
-    workers = WORKERS_DATASET_DEF.copy()
-    workers['label'] = 'WORKERS'
-    more = MOREWORKERS_DATASET_DEF.copy()
-    more['variables'] = [
-            v('joined', 'sum(join(name == WORKERS.name, WORKERS.max_production))'),
-    ]
+    workers = deepcopy(WORKERS_DATASET_DEF)
+    workers.name = 'WORKERS'
+    more = deepcopy(MOREWORKERS_DATASET_DEF)
+    more._add_var(
+            v('joined', 'sum(join(name == WORKERS.name, WORKERS.max_production))')
+    )
     sim = run_sim(
             [],
             policies=DUMMY_POLS,
@@ -253,15 +254,14 @@ def test_sum_join_multiple_datasets_undermatching_multiple_policies():
     )
 
 def test_sum_join_composite_mask_with_different_shapes():
-    workers = WORKERS_DATASET_DEF.copy()
-    workers['label'] = 'WORKERS'
-    more = MOREWORKERS_DATASET_DEF.copy()
-    workers['variables'] = [
-            v(
+    workers = deepcopy(WORKERS_DATASET_DEF)
+    workers.name = 'WORKERS'
+    more = deepcopy(MOREWORKERS_DATASET_DEF)
+    workers._add_var(v(
                 'joined',
                 'sum(join(workers == MOREWORKERS.borkers and MOREWORKERS.widgets==t, MOREWORKERS.borkers))'
-            ),
-    ]
+            ))
+            
     sim = run_sim(
             [],
             datasets=[more, workers],

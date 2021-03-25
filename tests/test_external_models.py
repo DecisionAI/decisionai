@@ -5,6 +5,7 @@ import pytest
 
 from helpers import run_sim, v, pols
 from sample_datasets import *
+from copy import deepcopy
 
 PICKLE_DIR = 'sample_models'
 def clf_factory(fname):
@@ -94,8 +95,8 @@ def test_probabilistic_sampling():
     assert 1 in df.pred
 
 def test_external_model_dataset_variable():
-    db = WORKERS_DATASET_DEF.copy()
-    db['variables'] = [v('pred', 'CLF.predict(EXAMPLE_LABEL.max_production, 25, t)')]
+    db = deepcopy(WORKERS_DATASET_DEF)
+    db._add_var(v('pred', 'CLF.predict(EXAMPLE_LABEL.max_production, 25, t)'))
     models = clf_factory('dummy.pickle')
     sim = run_sim(models=models, dataset=db)
     df = sim.dataset_df()
@@ -140,10 +141,9 @@ def test_sklearn_pipeline():
     """insurance_churn_model.pkl is an sklearn pipeline, with a classifier on
     the tail end. It takes as input [number, number, number, number, string].
     """
-    ds = INSURANCE_DATASET_DEF.copy()
-    ds['variables'] = [
-            v('churn', 'CLF.predict(t, t, initial_premium, initial_total_claims, location)'),
-    ]
+    ds = deepcopy(INSURANCE_DATASET_DEF)
+    ds._add_var(v('churn', 'CLF.predict(t, t, initial_premium, initial_total_claims, location)'))
+
     sim = run_sim([],
             models=clf_factory('insurance_churn_model.pkl'),
             dataset=ds,
@@ -152,11 +152,9 @@ def test_sklearn_pipeline():
     assert df.churn.isin([0, 1]).all()
 
 def test_model_predict_dataset_deps():
-    ds = INSURANCE_DATASET_DEF.copy()
-    ds['variables'] = [
-            v('foo', '10'),
-            v('churn', 'CLF.predict(t, t, foo, initial_total_claims, location)'),
-    ]
+    ds = deepcopy(INSURANCE_DATASET_DEF)
+    ds._add_var(v('foo', '10'))
+    ds._add_var(v('churn', 'CLF.predict(t, t, foo, initial_total_claims, location)'))
     sim = run_sim([],
             models=clf_factory('insurance_churn_model.pkl'),
             dataset=ds,

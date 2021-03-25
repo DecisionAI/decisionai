@@ -2,11 +2,13 @@ import numpy as np
 import pandas as pd
 import pytest
 
+from copy import deepcopy
 from sample_datasets import *
 from helpers import run_sim, v, pols
 
 def test_fibonacci():
-    sim = run_sim([v('a', 'a[t-1] + a[t-2]', initial='1')], num_steps=5)
+    sim = run_sim([v('a', 'a[t-1] + a[t-2]', initial="1")], num_steps=5)
+    import pdb; pdb.set_trace()
     sim.assert_values_match('a', [1, 2, 3, 5, 8, 13])
 
 def test_two_vars():
@@ -75,8 +77,8 @@ def test_with_policy_formulas():
     sim.assert_values_match('b', [0, 3, 3, 9], policy=1)
 
 def test_basic_dataset_addition_variable():
-    db = WORKERS_DATASET_DEF.copy()
-    db['variables'] = [v('rev_per_worker', "EXAMPLE_LABEL.max_production / EXAMPLE_LABEL.workers")]
+    db = deepcopy(WORKERS_DATASET_DEF)
+    db._add_var(v('rev_per_worker', "EXAMPLE_LABEL.max_production / EXAMPLE_LABEL.workers"))
     sim = run_sim(datasets=[db])
     # At every timestep, these should be our 2 values, in order of row index.
     single_timestep_val = [100/1, 200/30]
@@ -86,10 +88,9 @@ def test_basic_dataset_addition_variable():
     )
 
 def test_with_dataset_formulas_accessing_raw_data():
-    db = WORKERS_DATASET_DEF.copy()
-    db['variables'] = [
-            v('t_again', 't'),
-    ]
+    db = deepcopy(WORKERS_DATASET_DEF)
+    db._add_var(v('t_again', 't'))
+            
     sim = run_sim(
             policies=pols(price_per_unit=['10', '1']),
             dataset=db,
@@ -101,10 +102,9 @@ def test_with_dataset_formulas_accessing_raw_data():
     )
 
 def test_with_dataset_formulas_accessing_attributes():
-    db = WORKERS_DATASET_DEF.copy()
-    db['variables'] = [
-            v('rev_per_worker', "EXAMPLE_LABEL.max_production / EXAMPLE_LABEL.workers * price_per_unit"),
-    ]
+    db = deepcopy(WORKERS_DATASET_DEF)
+    db._add_var(v('rev_per_worker', "EXAMPLE_LABEL.max_production / EXAMPLE_LABEL.workers * price_per_unit"))
+            
     sim = run_sim([], 
             policies=pols(price_per_unit=['10', '5']),
             dataset=db,
@@ -122,12 +122,10 @@ def test_with_dataset_formulas_accessing_attributes():
     )
 
 def test_with_dataset_formulas_accessing_raw_data_and_attributes_and_vars():
-    db = WORKERS_DATASET_DEF.copy()
-    db['variables'] = [
-            v('rev_per_worker', 
+    db = deepcopy(WORKERS_DATASET_DEF)
+    db._add_var(v('rev_per_worker', 
                 "EXAMPLE_LABEL.max_production / EXAMPLE_LABEL.workers * price_per_unit * a_var",
-            ),
-    ]
+            ))
     sim = run_sim(
             [v('a_var', 't/10')],
             policies=pols(price_per_unit=['10', '5']),
@@ -141,11 +139,10 @@ def test_with_dataset_formulas_accessing_raw_data_and_attributes_and_vars():
     )
 
 def test_time_indexing_dataset_vars():
-    db = ASSETS_DATASET_DEF
-    db['variables'] = [
-            v('ds_var1', 'EXAMPLE_LABEL.factor_1'),
-            v('ds_var2', 'ds_var1[t-1]', '0'),
-    ]
+    db = deepcopy(ASSETS_DATASET_DEF)
+    db._add_var(v('ds_var1', 'EXAMPLE_LABEL.factor_1'))
+    db._add_var(v('ds_var2', 'ds_var1[t-1]', '0'))
+
     sim = run_sim(
             [v('lagged_var', 'sum(EXAMPLE_LABEL.ds_var1[t-1] + EXAMPLE_LABEL.ds_var2)', '0')],
             policies=pols(attribute1=['1']),

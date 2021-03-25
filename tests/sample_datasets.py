@@ -1,14 +1,15 @@
 from io import StringIO
 import pandas as pd
+from decisionai.datasets import Dataset
 
 WORKERS_CSV = pd.read_csv(StringIO("""name,workers,max_production
 low,1,100
 medium,30,200"""))
 
-WORKERS_DATASET_DEF = dict(
-    label = "EXAMPLE_LABEL",
+WORKERS_DATASET_DEF = Dataset(
+    name = "EXAMPLE_LABEL",
     df = WORKERS_CSV,
-    variables = [],
+    vars = [],
 )
 
 ASSETS_CSV = pd.read_csv(StringIO("""asset_class,factor_1,factor_2,factor_3,factor_4
@@ -19,17 +20,17 @@ medium,3,20,0,3
 highish,3,25,0,4
 high,5,30,0,5
 extreme,10,40,10,6"""))
-ASSETS_DATASET_DEF = dict(
-    label = "EXAMPLE_LABEL",
+ASSETS_DATASET_DEF = Dataset(
+    name = "EXAMPLE_LABEL",
     df = ASSETS_CSV,
-    variables = [],
+    vars = [],
 )
 
 CSV3 = pd.read_csv(StringIO("keyCol,someValue\n" + "\n".join(f'{n},{n*3}' for n in range(50))))
-CSV3_DATASET_DEF = dict(
-    label = "TEST_FILE",
+CSV3_DATASET_DEF = Dataset(
+    name = "TEST_FILE",
     df = CSV3,
-    variables = [],
+    vars = [],
 )
 
 INSURANCE_CSV = pd.read_csv(StringIO("""id,initial_premium,initial_total_claims,location
@@ -39,10 +40,10 @@ INSURANCE_CSV = pd.read_csv(StringIO("""id,initial_premium,initial_total_claims,
 3,233,0,Cusco
 4,225,0,Cusco"""))
 
-INSURANCE_DATASET_DEF = dict(
-        label="INS",
+INSURANCE_DATASET_DEF = Dataset(
+        name="INS",
         df=INSURANCE_CSV,
-        variables = [],
+        vars = [],
 )
 
 # A dataset with structure parallel to the workers sample dataset. Used for
@@ -51,10 +52,10 @@ PARAWORKERS_CSV = pd.read_csv(StringIO("""name,borkers,widgets
 medium,30,20
 low,1,10"""))
 
-PARAWORKERS_DATASET_DEF = dict(
-    label = "PARAWORKERS",
+PARAWORKERS_DATASET_DEF = Dataset(
+    name = "PARAWORKERS",
     df = PARAWORKERS_CSV,
-    variables = [],
+    vars = [],
 )
 # Similar to workers, but having an extra (non-matching) row
 MOREWORKERS_CSV = pd.read_csv(StringIO("""name,borkers,widgets
@@ -62,8 +63,8 @@ medium,30,20
 high,30,2
 low,1,10"""))
 
-MOREWORKERS_DATASET_DEF = dict(
-    label = "MOREWORKERS",
+MOREWORKERS_DATASET_DEF = Dataset(
+    name = "MOREWORKERS",
     df = MOREWORKERS_CSV,
-    variables = [],
+    vars = [],
 )

@@ -2,6 +2,7 @@
 errors/warnings.
 """
 import pytest
+from copy import deepcopy
 
 from sample_datasets import *
 from helpers import run_sim as _run_sim, v, pols
@@ -14,26 +15,16 @@ def run_sim(*args, **kwargs):
 
 
 def test_sim_with_invalid_self_dep():
-    user_variables = [
-        {"short_name": "a", "equation": "a", "initial": 1},
-    ]
+    user_variables = [v("a", "a", 1)]
     sim = run_sim(user_variables)
     sim.assert_errors_match([['a', 'equation']])
 
 
 def test_handling_circular_dep_in_dataset():
-    db = ASSETS_DATASET_DEF
-    db['variables'] = [
-        {
-            "equation": "b",
-            "short_name": "a",
-        },
-        {
-            "equation": "a",
-            "initial": 0,
-            "short_name": "b",
-        },
-    ]
+    db = deepcopy(ASSETS_DATASET_DEF)
+    db._add_var(v("a", "b"))
+    db._add_var(v("a", "b", 0))
+
     sim = run_sim(datasets=[db])
     sim.assert_errors_match([
         ['EXAMPLE_LABEL.a', 'equation'],
@@ -69,8 +60,8 @@ def test_keyword_variable_name_in_formula():
 
 def test_other_illegal_variable_names():
     user_variables = [
-        {"short_name": "", "equation": "1",},
-        {"short_name": "12x", "equation": "12",},
+        v("", "1"),
+        v("12x", "12"),
     ]
     pols = [
         {"policy_name": "p1", "bad name": "13"},
@@ -84,15 +75,15 @@ def test_other_illegal_variable_names():
 
 def test_duplicate_variable_names():
     user_variables = [
-        {"short_name": "x", "equation": "1",},
-        {"short_name": "x", "equation": "2",},
+        v("x", "1"),
+        v("x", "2"),
     ]
     sim = run_sim(user_variables)
     sim.assert_errors_match([ ['x', 'short_name'] ])
 
 def test_var_attribute_name_duplication():
     user_variables = [
-        {"short_name": "x", "equation": "1",},
+        v("x", "1")
     ]
     pols = [
         {"policy_name": "p1", "x": "2"},
@@ -102,7 +93,7 @@ def test_var_attribute_name_duplication():
 
 def test_misparenthesised_policy_expr():
     user_variables = [
-        {"short_name": "x", "equation": "(t*2)",},
+        v("x", "(t*2)"),
     ]
     pols = [
         {"policy_name": "p1", "y": "12"},
@@ -113,7 +104,7 @@ def test_misparenthesised_policy_expr():
 
 def test_variable_attr_circular_dep():
     user_variables = [
-        {"short_name": "x", "equation": "y[t]",},
+        v("x", "y[t]")
     ]
     pols = [
         {"policy_name": "p1", "y": "x[t]"},
@@ -136,37 +127,31 @@ def test_attribute_self_dep():
     sim.assert_errors_match([ ['x', 'equation'] ])
 
 def test_missing_variable_dep():
-    user_variables = [
-        {"short_name": "x", "equation": "z[t] + 1",},
-    ]
+    user_variables = [v("x", "z[t] + 1")]
     sim = run_sim(user_variables)
     sim.assert_errors_match([ ['x', 'equation', 'No variable named z'] ])
 
 def test_missing_lagged_variable_dep():
-    user_variables = [
-        {"short_name": "x", "equation": "z[t-1] + 1",},
-    ]
+    user_variables = [v("x","z[t-1] + 1")]
     sim = run_sim(user_variables)
     sim.assert_errors_match([ ['x', 'equation', 'No variable named z'] ])
 
 def test_sum_missing_column():
-    db = WORKERS_DATASET_DEF.copy()
+    db = deepcopy(WORKERS_DATASET_DEF)
     vars = [v('x', 'sum(EXAMPLE_LABEL.not_a_column)')]
     sim = run_sim(vars, datasets=[db])
     sim.assert_errors_match([ ['x', 'equation', 'not_a_column'] ])
 
 def test_nonexistent_dataset_label():
-    db = WORKERS_DATASET_DEF.copy()
+    db = deepcopy(WORKERS_DATASET_DEF)
     vars = [v('x', 'sum(FAKE_DATASET.workers)')]
     sim = run_sim(vars, datasets=[db])
     sim.assert_errors_match([ ['x', 'equation', 'FAKE_DATASET'] ])
 
 def test_initial_value_from_missing_dataset_column():
-    db = WORKERS_DATASET_DEF.copy()
+    db = deepcopy(WORKERS_DATASET_DEF)
     # NB: This dataset doesn't have a column called "dollars"
-    db['variables'] = [
-            {"short_name": "x", "equation": "x[t-1] + 1", "initial": "dollars"},
-    ]
+    db._add_var(v("x", "x[t-1] + 1", "dollars"))
     sim = run_sim(datasets=[db])
     sim.assert_errors_include([ ['EXAMPLE_LABEL.x', 'initial'] ])
     # Currently, in any case where an invalid initial value is provided, we

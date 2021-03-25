@@ -12,67 +12,43 @@ from typing import (
         Union, Tuple,
 )
 
-from .variables import SingleTreeVariable
+from .variables import Variable
 
 
-class DatasetVarDefinition(TypedDict, total=False):
-    short_name: str
-    equation: str
-    # Optional: initial value. May be number or name of a dataset column.
-    initial: str
-
-class DatasetAdditionVar(SingleTreeVariable):
+class DatasetAdditionVar(Variable):
     # initial values may be a sequence if a column is provided
     initial: Union[Number,None,Sequence]
     parent_table_label: str
 
-    def __init__(self, name, tree, initial, parent_table_label, errors=None):
+    def __init__(self, var, parent_table_label):
+        # TODO: Use less hacky way to take Variable as input and hold a wrapped version as a DatasetAdditionVar
+        self.name = var.name
+        self.formula = var.formula
+        self.initial = var.initial
+        self.errors = var.errors
+        self._poisoned = var._poisoned
+        self.tree = var.tree
         self.parent_table_label = parent_table_label
-        self.tree = tree
-        super().__init__(name, initial, errors)
 
     @property
     def dotted_name(self):
         return self.parent_table_label + '.' + self.name
 
-    @classmethod
-    def from_json(cls, raw: DatasetVarDefinition, dataset: 'Dataset'):
-        name = raw['short_name']
-        formula = raw["equation"]
-        errors = []
-        parent_table_label = dataset.name
-        try:
-            tree = cls._parse_eqn(formula)
-        except SyntaxError as err:
-            errors.append([name, "equation", err.msg])
-            tree = None
 
-        init = raw.get("initial")
-        if init is None:
-            pass
-        elif init in dataset.df.columns:
-            init = dataset.df.loc[:, init].values
-        else:
-            try:
-                init = float(init)
-            except ValueError:
-                errors.append([parent_table_label + '.' + name, "initial",
-                    f"Initial value must be a number or column name. Was: {init}"])
-                init = None
-        return cls(name, tree, init, parent_table_label, errors)
-
-class DatasetDefinition(TypedDict, total=False):
-    # TODO:  Should get rid of this and just instantiate datasets. This is a throwback to when a definition wasn't a 
-    # dataframe because the user specified a URI
-    label: str
-    variables: List[DatasetVarDefinition]
-    df: pd.DataFrame
-
-class Dataset(NamedTuple):
-    # TODO: should probably call this 'label' for consistency with naming elsewhere
+class Dataset():
+    # TODO: improve consistency between "name" and "label" for naming datasets
     name: str
     df: pd.DataFrame
-    added_vars: Iterable[DatasetAdditionVar]
+    added_vars: Iterable[Variable]
+
+    def __init__(self, name, df, vars):
+        self.name = name
+        self.df = df
+        self.added_vars = [DatasetAdditionVar(var, self.name) for var in vars]
+
+    # TODO: Did this to simplify modifying a test. In long term, we shouldn't be mutating a dataset by adding a var
+    def _add_var(self, var):
+        self.added_vars.append(DatasetAdditionVar(var, self.name))
 
     @property
     def shortnames(self) -> Set[str]:
@@ -81,20 +57,6 @@ class Dataset(NamedTuple):
     @property
     def columns(self):
         return self.df.columns
-
-    def add_variable(self, vardef: DatasetVarDefinition):
-        var = DatasetAdditionVar.from_json(vardef, self)
-        self.added_vars.append(var)
-
-    @classmethod
-    def from_json(cls, raw: DatasetDefinition) -> 'Dataset':
-        file_label = raw["label"]
-        # TODO: Have this access real data
-        df = raw['df']
-        ds = cls(name=file_label, df=df, added_vars=[])
-        for vardef in raw.get("variables", []):
-            ds.add_variable(vardef)
-        return ds
 
     @property
     def n_rows(self):

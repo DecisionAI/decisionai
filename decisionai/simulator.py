@@ -5,12 +5,11 @@ from typing import Iterable, Dict, List, Union, Set, Tuple, Optional, Any
 from .datasets import (
     Dataset,
     DatasetAdditionVar,
-    DatasetDefinition,
     DatasetVariableValueHolder,
 )
 from .external_models import parse_model_defn, ExternalModelDefinition, Model
 from .policies import PolicyAttribute, PolicyDefinition, policies_to_attributes, get_num_policies
-from .variables import BaseVariable, Variable, VarDefinition
+from .variables import BaseVariable, Variable
 from .topo_sort import topo_sort_removing_errors
 from .errors import Error, VisibleError, SilentError
 from .formulas import DependencyCollector, TreeTransformer, TreeEvaluator
@@ -67,9 +66,9 @@ class Simulation:
         return self.variables + self.attributes + self.dataset_variables
 
     def __init__(self,
-        variables: Iterable[VarDefinition] = [],
+        variables: Iterable[Variable] = [],
         policies: Iterable[PolicyDefinition] = [],
-        datasets: Iterable[DatasetDefinition] = [],
+        datasets: Iterable[Dataset] = [],
         external_models: Iterable[ExternalModelDefinition] = [],
         num_steps: int = 50,
         num_sims: int = 50,
@@ -78,8 +77,7 @@ class Simulation:
         self.num_steps = num_steps
         self.num_sims = num_sims
         self.attributes = policies_to_attributes(policies)
-        self.variables = [Variable.from_json(vardef) for vardef in variables]
-        datasets = [Dataset.from_json(dsdef) for dsdef in datasets]
+        self.variables = variables
         self.datasets = {ds.name: ds for ds in datasets}
         
         self._validate_unique_names()
@@ -203,12 +201,13 @@ class Simulation:
             # as above, but don't record anything
             node.set_poisoned(policy_index)
             return
-        if isinstance(node, Variable):
-            self.var_values[node.name][time] = result
-        elif isinstance(node, DatasetAdditionVar):
+        if isinstance(node, DatasetAdditionVar):
             self.dataset_var_values[node.parent_table_label][node.name][time] = result
         elif isinstance(node, PolicyAttribute):
             self.attrib_values[node.name][time, policy_index, :] = result
+        elif isinstance(node, Variable):
+            self.var_values[node.name][time] = result
+
         else:
             raise ValueError(f"Not a BaseVariable: {node}")
 

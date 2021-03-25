@@ -11,6 +11,7 @@ import keyword
 from .errors import Error, VisibleError
 
 class BaseVariable:
+    # This is used as a base for both Variables and policy attributes
     # This is the 'short' name (i.e. no dotted prefix with the dataset name)
     name: str
     errors: List[Error]
@@ -43,8 +44,7 @@ class BaseVariable:
         elif not self.name.isidentifier():
             record_err('Not a valid Python identifier.')
 
-    @classmethod
-    def _parse_eqn(cls, eqn: str) -> ast.AST:
+    def _parse_eqn(self, eqn: str) -> ast.AST:
         # Allow '^' as alias for exponentiation, and replace newlines with spaces.
         eqn = eqn.replace('^', '**').replace('\n', ' ')
         return ast.parse(eqn, mode='eval')
@@ -74,20 +74,24 @@ class BaseVariable:
     def is_poisoned(self, policy_index: Optional[int]):
         raise NotImplementedError
 
-class VarDefinition(TypedDict, total=False):
-    """A user-defined variable, as provided as input to API endpoint.
-    """
-    short_name: str
-    equation: str
-    initial: str
-
-class SingleTreeVariable(BaseVariable):
+class Variable(BaseVariable):
     tree: Optional[ast.AST]
     _poisoned: bool
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, name, formula, initial=None, errors=None):
+        super().__init__(name, initial, errors)
+        self.name = name
+        self.formula = formula
+        self.initial = initial
+        self.errors = []
         self._poisoned = False
-        super().__init__(*args, **kwargs)
+
+        try:
+            self.tree = self._parse_eqn(formula)
+        except SyntaxError as err:
+            self.errors.append([name, "equation", err.msg])
+            self.tree = None
+
 
     def set_poisoned(self, policy_index: Optional[int]):
         self._poisoned = True
@@ -95,30 +99,6 @@ class SingleTreeVariable(BaseVariable):
     def is_poisoned(self, policy_index: Optional[int]):
         return self._poisoned or (self.tree is None)
 
-class Variable(SingleTreeVariable):
-    initial: Optional[Number]
 
-    def __init__(self, name, tree, initial, errors=None):
-        super().__init__(name, initial, errors)
-        self.tree = tree
 
-    @classmethod
-    def from_json(cls, raw: VarDefinition):
-        name = raw['short_name']
-        formula = raw["equation"]
-        errors = []
-        try:
-            tree = cls._parse_eqn(formula)
-        except SyntaxError as err:
-            errors.append([name, "equation", err.msg])
-            tree = None
-        try:
-            if "initial" in raw and raw["initial"] != "":
-                initial = float(raw["initial"])
-            else:
-                initial = None
-        except ValueError:
-            errors.append([name, "initial", "Initial value must be a number"])
-            initial = None
-        return cls(name, tree, initial, errors)
 

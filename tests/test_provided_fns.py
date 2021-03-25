@@ -5,9 +5,10 @@ import pytest
 
 from sample_datasets import *
 from helpers import run_sim, v, pols
+from copy import deepcopy
 
 def test_sum_fn():
-    db = WORKERS_DATASET_DEF.copy()
+    db = deepcopy(WORKERS_DATASET_DEF)
     sim = run_sim(
             [v('x', 'sum(EXAMPLE_LABEL.workers)')],
             dataset=db,
@@ -19,7 +20,7 @@ def test_sum_fn():
 def test_sum_from_dataset_fn_deprecated_alias():
     # what we now call sum we used to call sum_from_dataset. We still want to
     # support that old name as an alias (for now)
-    db = WORKERS_DATASET_DEF.copy()
+    db = deepcopy(WORKERS_DATASET_DEF)
     sim = run_sim(
             [v('x', 'sum_from_dataset(EXAMPLE_LABEL.workers)')],
             dataset=db,
@@ -31,7 +32,7 @@ def test_sum_from_dataset_fn_deprecated_alias():
 def test_sum_user_dataset_var():
     """Calling sum on a "DatasetAdditionVar" rather than a column
     in the original dataset."""
-    db = WORKERS_DATASET_DEF.copy()
+    db = deepcopy(WORKERS_DATASET_DEF)
     db['variables'] = [v('workertime', 'EXAMPLE_LABEL.workers * t')]
     sim = run_sim([
             v('x', 'sum(EXAMPLE_LABEL.workertime)'),
@@ -47,8 +48,8 @@ def test_sum_user_dataset_var():
 def test_sum_constant_user_dataset_var():
     """Calling sum on a DatasetAdditionVar with a constant value
     (and also using multiple sims and policies)"""
-    db = WORKERS_DATASET_DEF.copy()
-    db['variables'] = [ v('seven', '7') ]
+    db = deepcopy(WORKERS_DATASET_DEF)
+    db._add_var(v('seven', '7'))
     sim = run_sim([
             v('x', 'sum(EXAMPLE_LABEL.seven)'),
         ],
@@ -109,10 +110,8 @@ def test_binomial():
     assert (values <= 100).all()
 
 def test_randomness_spread_over_dataset_rows():
-    workers = MOREWORKERS_DATASET_DEF.copy()
-    workers['variables'] = [
-            v('x', 'uniform(0, 100)'),
-    ]
+    workers = deepcopy(MOREWORKERS_DATASET_DEF)
+    workers._add_var(v('x', 'uniform(0, 100)'))
     sim = run_sim(dataset=workers)
     values = sim.get_values('MOREWORKERS.x', t=1)
     # We don't want to reuse randomness across rows, so ensure these values
