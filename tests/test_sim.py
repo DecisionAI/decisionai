@@ -7,8 +7,7 @@ from sample_datasets import *
 from helpers import run_sim, v, pols
 
 def test_fibonacci():
-    sim = run_sim([v('a', 'a[t-1] + a[t-2]', initial="1")], num_steps=5)
-    import pdb; pdb.set_trace()
+    sim = run_sim([v('a', 'a[t-1] + a[t-2]', initial=1)], num_steps=5)
     sim.assert_values_match('a', [1, 2, 3, 5, 8, 13])
 
 def test_two_vars():

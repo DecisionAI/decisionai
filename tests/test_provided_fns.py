@@ -33,7 +33,7 @@ def test_sum_user_dataset_var():
     """Calling sum on a "DatasetAdditionVar" rather than a column
     in the original dataset."""
     db = deepcopy(WORKERS_DATASET_DEF)
-    db['variables'] = [v('workertime', 'EXAMPLE_LABEL.workers * t')]
+    db._add_var(v('workertime', 'EXAMPLE_LABEL.workers * t'))
     sim = run_sim([
             v('x', 'sum(EXAMPLE_LABEL.workertime)'),
         ],

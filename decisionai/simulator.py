@@ -218,13 +218,15 @@ class Simulation:
         policy_index,
     ):
         var = self.var_lookup[varname]
-        if isinstance(var, Variable):
-            data = self.var_values[varname]
-        elif isinstance(var, PolicyAttribute):
+        if isinstance(var, PolicyAttribute):
             data = self.attrib_values[varname]
         elif isinstance(var, DatasetAdditionVar):
             ds_name = var.parent_table_label
             data = self.dataset_var_values[ds_name][var.name]
+        # Types above are subsets of Variable, so this needs to come last
+        # to avoid catching other lookup types
+        elif isinstance(var, Variable):
+            data = self.var_values[varname]
         else:
             raise ValueError(f"Unrecognized var type: {var}")
         timed_data = data[time]

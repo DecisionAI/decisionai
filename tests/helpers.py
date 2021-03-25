@@ -11,7 +11,7 @@ from decisionai.policies import PolicyDefinition
 
 def v(short_name:str, equation:str, initial=None) -> Variable:
     # TODO: Remove this, and replace any references to v with direct creation of Variable
-    return Variable(short_name, equation)
+    return Variable(short_name, equation, initial)
 
 def pols(**kwargs) -> List[PolicyDefinition]:
     """
