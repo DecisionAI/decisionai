@@ -4,7 +4,9 @@ import pytest
 
 from copy import deepcopy
 from sample_datasets import *
-from helpers import run_sim, v, pols
+from helpers import run_sim, pols
+from decisionai.variables import Variable as v
+
 
 def test_fibonacci():
     sim = run_sim([v('a', 'a[t-1] + a[t-2]', initial=1)], num_steps=5)

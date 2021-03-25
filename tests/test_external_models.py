@@ -3,7 +3,8 @@ import numpy as np
 import os
 import pytest
 
-from helpers import run_sim, v, pols
+from helpers import run_sim, pols
+from decisionai.variables import Variable as v
 from sample_datasets import *
 from copy import deepcopy
 

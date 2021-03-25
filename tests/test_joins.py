@@ -1,7 +1,9 @@
 import pytest
 
 from sample_datasets import *
-from helpers import run_sim, v, pols
+from helpers import run_sim, pols
+from decisionai.variables import Variable as v
+
 from copy import deepcopy
 
 # TODO: All through this file we're reusing some mocks, copying and mutating

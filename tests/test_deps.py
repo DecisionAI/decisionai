@@ -4,7 +4,7 @@ import pytest
 
 from sample_datasets import *
 from decisionai.simulator import Simulation
-from helpers import v
+from decisionai.variables import Variable as v
 
 def test_no_deps():
     sim = Simulation([v('x', '0'), v('y', '2**3')])

@@ -9,10 +9,6 @@ from decisionai.variables import Variable
 from decisionai.datasets import Dataset
 from decisionai.policies import PolicyDefinition
 
-def v(short_name:str, equation:str, initial=None) -> Variable:
-    # TODO: Remove this, and replace any references to v with direct creation of Variable
-    return Variable(short_name, equation, initial)
-
 def pols(**kwargs) -> List[PolicyDefinition]:
     """
     kwargs should be structured such that keys are the names of attributes
