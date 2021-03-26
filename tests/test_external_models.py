@@ -28,7 +28,7 @@ def test_external_model_basic():
             ],
             model=model,
     )
-    df = sim.var_df
+    df = sim.results
     assert df.demand.isnull().sum() == 0
     assert df.demand.std() > 0
 
@@ -40,7 +40,7 @@ def test_dummy_classifier():
         v('prob', 'CLF.predict_proba(t)'),
         ], models=clf_factory('dummy.pickle'),
     )
-    df = sim.var_df
+    df = sim.results
     # All predicted labels should be 0 or 1
     assert df.pred.isin([0, 1]).all()
     # All probabilities should be .5
@@ -54,7 +54,7 @@ def test_dummy_classifier_multiple_policies():
         policies=pols(x=['1', '2']),
         models=clf_factory('dummy.pickle'),
     )
-    df = sim.var_df
+    df = sim.results
     # All predicted labels should be 0 or 1
     assert df.pred.isin([0, 1]).all()
     # All probabilities should be .5
@@ -90,7 +90,7 @@ def test_probabilistic_sampling():
     # labels. So all our predicted probabilities should be around .9, but we
     # should still almost always get at least one negative prediction.
     # (NB: There's a ~1e-46 of this test spuriously failing.)
-    df = sim.var_df
+    df = sim.results
     assert (df.prob > .5).all()
     assert 0 in df.pred
     assert 1 in df.pred
@@ -119,7 +119,7 @@ def test_tf_regression_model():
             [v('pred', 'CLF.predict(t, t+1, 0.5)'),],
             models=clf_factory('tf_three_input_model.h5'),
     )
-    preds = sim.var_df.pred
+    preds = sim.results.pred
     assert not preds.isnull().any()
     assert preds.dtype.kind == 'f' # float
 

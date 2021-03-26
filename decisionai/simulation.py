@@ -1,6 +1,9 @@
 from collections import defaultdict, Counter
+import itertools
 import numpy as np
+from pandas import DataFrame
 from typing import Iterable, Dict, List, Union, Set, Tuple, Optional, Any
+
 
 from .dataset import (
     Dataset,
@@ -100,8 +103,8 @@ class Simulation:
 
         # Get data structures to hold variable values. Also populates with
         # any static initial values.
-        self.var_values = _get_standard_value_holder(self.variables, self.num_policies, num_steps, num_sims)
-        self.var_values["t"] = np.tile(
+        self._raw_var_values = _get_standard_value_holder(self.variables, self.num_policies, num_steps, num_sims)
+        self._raw_var_values["t"] = np.tile(
                 np.reshape(range(self.num_steps+1), (self.num_steps+1, 1, 1)),
                 (1, self.num_policies, self.num_sims)
         )
@@ -206,10 +209,10 @@ class Simulation:
         elif isinstance(node, PolicyAttribute):
             self.attrib_values[node.name][time, policy_index, :] = result
         elif isinstance(node, Variable):
-            self.var_values[node.name][time] = result
-
+            self._raw_var_values[node.name][time] = result
         else:
-            raise ValueError(f"Not a BaseVariable: {node}")
+            import pdb; pdb.set_trace()
+            raise ValueError(f"Could not evaluate: {node}")
 
     def _lookup_var(
         self,
@@ -226,7 +229,7 @@ class Simulation:
         # Types above are subsets of Variable, so this needs to come last
         # to avoid catching other lookup types
         elif isinstance(var, Variable):
-            data = self.var_values[varname]
+            data = self._raw_var_values[varname]
         else:
             raise ValueError(f"Unrecognized var type: {var}")
         timed_data = data[time]
@@ -342,6 +345,47 @@ class Simulation:
                 [name, "equation", "cannot determine values due to circular dependency"]
             )
 
+    @property
+    def results(self) -> DataFrame:
+        """Return results of main variables
+        """
+        time_arrays = self._raw_var_values["t"]
+        # List of tuples indexing values in any given timestep. (0, 0), (0, 1), ... (1, 0)...
+        rowcols = list(itertools.product(*map(range, time_arrays[0].shape)))
+
+        # Adding a timestep index. ((0, 0), 0), ((0, 1), 0), ... ((1, 0), 0), ... ((0, 0), 1), ...
+        rowcol_ts = list(
+            itertools.chain(
+                *([[(rowcol, t) for rowcol in rowcols] for t in range(len(time_arrays))])
+            )
+        )
+
+        simIds = [x[0][1] for x in rowcol_ts]
+        policyIds = [x[0][0] for x in rowcol_ts]
+        ts = [x[1] for x in rowcol_ts]
+
+        sim_pol_ts = list(zip(simIds, policyIds, ts))
+
+        def get_item(arrays, sim_pol_t):
+            sim, pol, t = sim_pol_t
+            a = arrays[t]
+            return a[pol, sim]
+
+        def add_sim_policy_t_columns(in_results: Dict[str, List]):
+            # Map these three standard keys to flat lists of their values
+            in_results["simId"] = map(lambda x: x, simIds)
+            in_results["policyId"] = policyIds
+            in_results["t"] = ts
+
+        # Map variable name to flat list of values
+        var_results = {
+            varname: list(map(lambda sim_pol_t: get_item(var_val_array, sim_pol_t), sim_pol_ts))
+            for varname, var_val_array in self._raw_var_values.items()
+        }
+
+        # Add standard keys (simId, policyId, t)
+        add_sim_policy_t_columns(var_results)
+        return DataFrame(var_results)
 
 def _get_standard_value_holder(
     nodes: Iterable[Union[Variable, PolicyAttribute]],
@@ -394,3 +438,4 @@ def _organize_errors(errors_list):
 
 def _get_self_refs(refs: Dict[str, Set[str]]) -> List[str]:
     return [k for k in refs if k in refs[k]]
+

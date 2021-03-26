@@ -58,7 +58,7 @@ def test_sum_constant_user_dataset_var():
         dataset=db,
         num_sims=5,
     )
-    x = sim.var_df.x
+    x = sim.results.x
     assert (x == 14).all()
     assert len(x) == 40 # 5 sims * 2 policies * 4 timesteps
 

@@ -1,8 +1,9 @@
 """
 Helper functions related to reshaping and munging data that we intend to send
-in API responses.
+in API responses for web app. 
+
+Once we solve https://github.com/DecisionAI/decisionai/issues/2 we can remove this
 """
-import itertools
 from typing import Iterable, List, Dict, Tuple, Any
 from numbers import Number
 import numpy as np
@@ -28,9 +29,6 @@ def excerpt_dataset_results(ds_var_values):
         res[ds_label] = newrows
     return res
 
-def var_values_df(sim):
-    return _var_values_df(sim.var_values)
-
 def dataset_var_values_excerpt_dfs(sim, labels=None):
     """
     Return a dict mapping dataset labels to dataframes of dataset variable
@@ -44,7 +42,7 @@ def dataset_var_values_excerpt_dfs(sim, labels=None):
     time_arrays = [
             arr[:,0] # only simId = 0
             for arr in
-            sim.var_values["t"][timeslice]
+            sim._raw_var_values["t"][timeslice]
     ]
     n_timesteps = len(time_arrays)
     ts = np.array(time_arrays)
@@ -72,44 +70,4 @@ def dataset_var_values_excerpt_dfs(sim, labels=None):
     return res
 
 
-def _var_values_df(var_values):
-    """Return a dataframe with columns [t, simId, policyId] + a column for each
-    variable name in var_values.
-    """
-    time_arrays = var_values["t"]
-    # List of tuples indexing values in any given timestep. (0, 0), (0, 1), ... (1, 0)...
-    rowcols = list(itertools.product(*map(range, time_arrays[0].shape)))
 
-    # Adding a timestep index. ((0, 0), 0), ((0, 1), 0), ... ((1, 0), 0), ... ((0, 0), 1), ...
-    rowcol_ts = list(
-        itertools.chain(
-            *([[(rowcol, t) for rowcol in rowcols] for t in range(len(time_arrays))])
-        )
-    )
-
-    simIds = [x[0][1] for x in rowcol_ts]
-    policyIds = [x[0][0] for x in rowcol_ts]
-    ts = [x[1] for x in rowcol_ts]
-
-    sim_pol_ts = list(zip(simIds, policyIds, ts))
-
-    def get_item(arrays, sim_pol_t):
-        sim, pol, t = sim_pol_t
-        a = arrays[t]
-        return a[pol, sim]
-
-    def add_sim_policy_t_columns(in_results: Dict[str, List]):
-        # Map these three standard keys to flat lists of their values
-        in_results["simId"] = map(lambda x: x, simIds)
-        in_results["policyId"] = policyIds
-        in_results["t"] = ts
-
-    # Map variable name to flat list of values
-    var_results = {
-        varname: list(map(lambda sim_pol_t: get_item(var_val_array, sim_pol_t), sim_pol_ts))
-        for varname, var_val_array in var_values.items()
-    }
-
-    # Add standard keys (simId, policyId, t)
-    add_sim_policy_t_columns(var_results)
-    return pd.DataFrame(var_results)

@@ -3,9 +3,8 @@ from typing import Iterable, List
 import numpy as np
 import pytest
 
-from decisionai import api_helpers, constants
+from decisionai import dataset_excerpt_helpers, constants
 from decisionai.simulation import Simulation
-from decisionai import api_helpers
 from decisionai.variable import Variable
 from decisionai.dataset import Dataset
 from decisionai.policy import PolicyDefinition
@@ -32,9 +31,6 @@ def pols(**kwargs) -> List[PolicyDefinition]:
 class TestSim(Simulation):
     """A wrapper around Simulation with some additional methods useful for testing.
     """
-    @property
-    def var_df(self):
-        return api_helpers.var_values_df(self)
 
     def dataset_df(self, label=None):
         # NB: because we're using the excerpt code path, there will be no
@@ -42,7 +38,7 @@ class TestSim(Simulation):
         if label is None:
             assert len(self.datasets) == 1, "Explicit label must be provided if n datasets != 1"
             label = list(self.datasets.keys())[0]
-        df_dict = api_helpers.dataset_var_values_excerpt_dfs(self, [label])
+        df_dict = dataset_excerpt_helpers.dataset_var_values_excerpt_dfs(self, [label])
         return df_dict[label]
 
     def assert_values_match_across_time(self, varname, expected, **kwargs):
@@ -71,7 +67,7 @@ class TestSim(Simulation):
             label, varname = varname.split('.')
             df = self.dataset_df(label)
         else:
-            df = self.var_df
+            df = self.results
         if policy is not None:
             df = df[df.policyId == policy]
         if sim_id is not None:
@@ -108,7 +104,7 @@ class TestSim(Simulation):
         np.testing.assert_allclose(vals, expected)
 
     def assert_null_values(self, varname):
-        assert self.var_df[varname].isnull().all()
+        assert self.results[varname].isnull().all()
 
     def errors(self):
         return (

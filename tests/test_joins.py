@@ -79,7 +79,7 @@ def test_join_fn_multiple_policies():
         dataset=ASSETS_DATASET_DEF,
         num_sims=2,
     )
-    assert (sim.var_df.b_var == 20).all()
+    assert (sim.results.b_var == 20).all()
 
 def test_join_fn_reduced_dim_boolean_expr():
     """Verify that joins work even when the mask (the first arg) doesn't naturally
@@ -134,7 +134,7 @@ def test_join_fn_indexing_matters():
             num_steps=5,
             num_sims=2,
     )
-    df = sim.var_df
+    df = sim.results
     assert (df.loc[df.t == 1, 'b'] == 3).all()
     assert (df.loc[df.t == 5, 'b'] == 15).all()
 
