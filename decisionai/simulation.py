@@ -52,7 +52,7 @@ class Simulation:
     deps: Dict[str, Set[str]]
     
     # These are passed in the 'main errors' category of the API response.
-    # TODO: This is sort of a hack. Should have dedicated category for external error models in API response.
+    # TODO: Error handling is built around the app. Fix this for library-specific error handling
     extra_errors: List[Error]
 
     nodes_in_order: List[str]
@@ -211,7 +211,6 @@ class Simulation:
         elif isinstance(node, Variable):
             self._raw_var_values[node.name][time] = result
         else:
-            import pdb; pdb.set_trace()
             raise ValueError(f"Could not evaluate: {node}")
 
     def _lookup_var(
