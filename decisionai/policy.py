@@ -3,8 +3,8 @@ from typing import List, Optional, Dict
 
 from .variable import BaseVariable
 
-"""A specification of a policy, as received by the API.
-Must have a 'policy_name' key, mapping to the name of the policy.
+"""A specification of a policy.
+Must have a 'policy_name' key for the name of the policy.
 All other key, value pairs correspond to attribute names and formulas, respectively.
 """
 PolicyDefinition = Dict[str, str]
